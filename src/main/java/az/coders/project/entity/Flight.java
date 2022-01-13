@@ -1,4 +1,4 @@
-package project.entity;
+package main.java.az.coders.project.entity;
 
 import java.sql.Time;
 import java.util.Date;
@@ -12,6 +12,9 @@ public class Flight {
     private Time time;
     private String destination;
     private Time duration;
+
+    public Flight() {
+    }
 
     public Flight(long id, String flightNumber, Date date, Time time, String destination, Time duration) {
         this.id = id;
@@ -74,13 +77,13 @@ public class Flight {
 
     @Override
     public String toString() {
-        return "Flight{" +
-                "id=" + id +
-                ", flightNumber='" + flightNumber + '\'' +
-                ", date=" + date +
-                ", time=" + time +
-                ", destination='" + destination + '\'' +
-                ", duration=" + duration +
-                '}';
+        return "[" +
+                "id : " + id +
+                ", flightNumber : '" + flightNumber + '\'' +
+                ", date : " + date +
+                ", time : " + time +
+                ", destination : '" + destination + '\'' +
+                ", duration: " + duration +
+                ']';
     }
 }

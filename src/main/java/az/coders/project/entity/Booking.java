@@ -1,4 +1,4 @@
-package project.entity;
+package main.java.az.coders.project.entity;
 
 import java.util.Objects;
 
@@ -61,10 +61,11 @@ public class Booking {
 
     @Override
     public String toString() {
-        return "Booking{" +
-                "bookId=" + bookId +
-                ", person=" + person +
-                ", flight=" + flight +
-                '}';
+        return "[" +
+                "bookId :" + bookId +
+                ", person :" + person +
+                ", date : " + flight.getDate() +
+                ", destination : '" + flight.getDestination() + '\'' +
+                ']';
     }
 }

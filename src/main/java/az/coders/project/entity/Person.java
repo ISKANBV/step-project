@@ -1,4 +1,4 @@
-package project.entity;
+package main.java.az.coders.project.entity;
 
 import java.util.Objects;
 

@@ -1,4 +1,4 @@
-package project;
+package main.java.az.coders.project;
 
 public class Main {
 

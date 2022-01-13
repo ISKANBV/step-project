@@ -1,4 +1,4 @@
-package project.exceptions;
+package main.java.az.coders.project.exceptions;
 
 public class CommandNotFoundException extends Exception{
 

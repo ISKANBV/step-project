@@ -1,12 +1,13 @@
-package project.services;
+package main.java.az.coders.project.services;
 
-import project.commands.Cmd;
-import project.dao.JDBC;
-import project.dao.PgJDBC;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.DateFormat;
+import main.java.az.coders.project.commands.Cmd;
+import main.java.az.coders.project.dao.JDBC;
+import main.java.az.coders.project.dao.PgJDBC;
+import main.java.az.coders.project.entity.Booking;
+import main.java.az.coders.project.entity.Flight;
+import main.java.az.coders.project.entity.Person;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -14,14 +15,107 @@ import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
-public class Services implements Service{
+public class ServiceImpl implements Service {
 
     private static final Scanner sc = new Scanner(System.in);
     private static final JDBC pgjdbc = new PgJDBC();
 
     @Override
+    public List<Flight> showFlights() {
+        return pgjdbc.getFlights();
+    }
+
+    @Override
+    public Flight getFlightInfoById() {
+        long id = checkFlightId();
+
+        return pgjdbc.getFlightInfoById(id);
+    }
+
+    @Override
+    public List<Flight> getSearchingFlights() {
+
+        System.out.println("Enter flight info.");
+
+        Date date = checkDate();
+
+        String destination = checkDestination();
+
+        pgjdbc.getSearchingFlights(new Flight(date,destination)).forEach(System.out::println);
+
+        return pgjdbc.getSearchingFlights(new Flight(date,destination));
+    }
+
+    @Override
+    public void bookingFlights() {
+        boolean b = false;
+        int peopleNumber = 0;
+        List<Flight> flights = getSearchingFlights();
+        Flight bookFlight = null;
+
+        String flightNumber = checkFlightNumber();
+
+
+        for (Flight flight : flights) {
+            if (flight.getFlightNumber().equals(flightNumber)) {
+                b = true;
+                bookFlight = flight;
+            }
+        }
+
+        if (b) {
+            peopleNumber = checkPeopleNumber();
+        }
+
+        for (int i = 0; i < peopleNumber; i++) {
+            String name = checkName();
+
+            String surname = checkSurname();
+
+            int age = checkAge();
+
+            System.out.println("------------------------");
+
+            pgjdbc.bookingFlights(bookFlight, new Person(name, surname, age));
+        }
+    }
+
+    @Override
+    public void cancelFlights() {
+        System.out.println("Cancel flight");
+
+        long id = checkBookingId();
+        long previousCount = pgjdbc.getMyFlightsCount();
+
+        pgjdbc.cancelFlights(id);
+
+        long presentCount = pgjdbc.getMyFlightsCount();
+
+        if (presentCount < previousCount) {
+            System.out.println("Cancellation was successful");
+        } else {
+            System.out.println("Cancellation failed");
+        }
+    }
+
+    @Override
+    public List<Booking> getMyFlights() {
+        return pgjdbc.getMyFlights();
+    }
+
+    @Override
+    public void updateFlightsDate() {
+        Date date = new Date("2000-10-10");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+//        Date date1 = format.format(date);
+
+
+        pgjdbc.updateFlightsDate(format,date);
+    }
+
+    @Override
     public boolean checkCmd(String cmd) {
-        for (Cmd cmdd: Cmd.values()) {
+        for (Cmd cmdd : Cmd.values()) {
             if (cmd.trim().equalsIgnoreCase(cmdd.name())) {
                 return false;
             }
@@ -33,17 +127,15 @@ public class Services implements Service{
     public long checkFlightId() {
         boolean c = true;
         int Id = 0;
-        while (c){
+        while (c) {
             System.out.print("Enter Id: ");
             Id = sc.nextInt();
 
-            if(Id < 0){
+            if (Id < 0) {
                 System.out.println("Id can't be negative!");
-            }
-            else if(Id > lastFlightId()){
+            } else if (Id > lastFlightId()) {
                 System.out.println("Id not found.");
-            }
-            else {
+            } else {
                 c = false;
             }
         }
@@ -55,18 +147,16 @@ public class Services implements Service{
     public Date checkDate() {
         boolean c = true;
         String date = null;
-        while (c){
+        while (c) {
             System.out.print("Enter date(YYYY-MM-DD): ");
             date = sc.nextLine();
 
 
-            if(date.isEmpty()){
+            if (date.isEmpty()) {
                 System.out.println("Date can't be empty!");
-            }
-            else if((boolean)dateFormat(date).get(0)){
+            } else if ((boolean) dateFormat(date).get(0)) {
                 System.out.println("Please try again");
-            }
-            else {
+            } else {
                 c = false;
             }
         }
@@ -77,14 +167,13 @@ public class Services implements Service{
     public String checkDestination() {
         boolean c = true;
         String destination = null;
-        while (c){
+        while (c) {
             System.out.print("Enter destination: ");
             destination = sc.nextLine();
 
-            if(destination.isEmpty()){
+            if (destination.isEmpty()) {
                 System.out.println("Destination can't be empty!");
-            }
-            else {
+            } else {
                 c = false;
             }
         }
@@ -95,14 +184,13 @@ public class Services implements Service{
     public String checkFlightNumber() {
         boolean c = true;
         String flightNumber = null;
-        while (c){
+        while (c) {
             System.out.print("Enter flightNumber: ");
             flightNumber = sc.nextLine();
 
-            if(flightNumber.isEmpty()){
+            if (flightNumber.isEmpty()) {
                 System.out.println("FlightNumber can't be empty!");
-            }
-            else {
+            } else {
                 c = false;
             }
         }
@@ -113,14 +201,13 @@ public class Services implements Service{
     public int checkPeopleNumber() {
         boolean c = true;
         int peopleNumber = 0;
-        while (c){
+        while (c) {
             System.out.print("Enter people number: ");
             peopleNumber = sc.nextInt();
 
-            if(peopleNumber <= 0){
+            if (peopleNumber <= 0) {
                 System.out.println("People number can't be 0 or negative!");
-            }
-            else {
+            } else {
                 c = false;
             }
         }
@@ -132,14 +219,13 @@ public class Services implements Service{
     public String checkName() {
         boolean c = true;
         String name = null;
-        while (c){
+        while (c) {
             System.out.print("Enter name: ");
             name = sc.nextLine();
 
-            if(name.isEmpty()){
+            if (name.isEmpty()) {
                 System.out.println("Name can't be empty!");
-            }
-            else {
+            } else {
                 c = false;
             }
         }
@@ -150,14 +236,13 @@ public class Services implements Service{
     public String checkSurname() {
         boolean c = true;
         String surname = null;
-        while (c){
+        while (c) {
             System.out.print("Enter surname: ");
             surname = sc.nextLine();
 
-            if(surname.isEmpty()){
+            if (surname.isEmpty()) {
                 System.out.println("Surname can't be empty!");
-            }
-            else {
+            } else {
                 c = false;
             }
         }
@@ -168,14 +253,13 @@ public class Services implements Service{
     public int checkAge() {
         boolean c = true;
         int age = 0;
-        while (c){
+        while (c) {
             System.out.print("Enter age: ");
             age = sc.nextInt();
 
-            if(age <= 0){
+            if (age <= 0) {
                 System.out.println("Age can't be 0 or negative!");
-            }
-            else {
+            } else {
                 c = false;
             }
         }
@@ -188,17 +272,15 @@ public class Services implements Service{
 
         boolean c = true;
         int bookId = 0;
-        while (c){
+        while (c) {
             System.out.print("Enter Id: ");
             bookId = sc.nextInt();
 
-            if(bookId < 0){
+            if (bookId < 0) {
                 System.out.println("Id can't be negative!");
-            }
-            else if(bookId > lastBookId()){
+            } else if (bookId > lastBookId()) {
                 System.out.println("Id not found.");
-            }
-            else {
+            } else {
                 c = false;
             }
         }
@@ -206,37 +288,15 @@ public class Services implements Service{
         return bookId;
     }
 
-    public static long lastBookId(){
-        int lastId = 0;
-        try {
-            ResultSet rs = pgjdbc.statement(pgjdbc.connection()).executeQuery("select bookid from booking order by bookid desc limit 1");
-            while (rs.next()){
-                lastId = rs.getInt("id");
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return lastId;
+    public static long lastBookId() {
+        return pgjdbc.findMaxBookId();
     }
 
-    public static long lastFlightId(){
-        int lastId = 0;
-        try {
-            ResultSet rs = pgjdbc.statement(pgjdbc.connection()).executeQuery("select id from flight order by id desc limit 1");
-            while (rs.next()){
-                lastId = rs.getInt("id");
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return lastId;
+    public static long lastFlightId() {
+        return pgjdbc.findMaxId();
     }
 
-    private static List<Object> dateFormat(String date){
+    private static List<Object> dateFormat(String date) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
         Date date1 = null;
 
@@ -246,6 +306,6 @@ public class Services implements Service{
             System.out.println("Date format wrong!");
             return Arrays.asList(true);
         }
-        return Arrays.asList(false,date1);
+        return Arrays.asList(false, date1);
     }
 }
